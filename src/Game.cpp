@@ -1,63 +1,60 @@
-#include "Game.h"
-#include <iostream>
-#include <time.h>
+#include "Game.hpp"
+#include <ctime>
+#include <cstdlib>
 #include <ncurses.h>
-Game::Game(int x, int y)
+Game::Game(size_t width, size_t height)
 {
-    _NumberOfMines = 0;
-    _UndiscoveredCells = x * y;
-    _NumberOfFlags = 0;
-    srand(time(NULL));
-    _Grid.reserve(x);
-    for (size_t i = 0; i < x; i++)
-        _Grid[i].reserve(y);
-
-    for (size_t i = 0; i < x; i++)
+    _number_of_mines = 0;
+    _number_of_flags = 0;
+    _width = width;
+    _height = height;
+    _Grid.reserve(_width);
+    for (size_t i = 0; i < _width; i++)
     {
+        _Grid[i].reserve(_height);
         _Grid.push_back(std::vector<Cell>());
-        for (size_t j = 0; j < y; j++)
+        for (size_t j = 0; j < _height; j++)
         {
             _Grid[i].push_back(Cell());
         }
     }
-    _ResX = x;
-    _ResY = y;
 }
 Game::~Game()
 {
 
 }
-void Game::begin(int mines)
+void Game::begin(size_t mines)
 {
+    std::srand(std::time(NULL));
     do
     {
         for (size_t i = 0; i < _Grid.size(); i++)
         {
             for (size_t j = 0; j < _Grid[i].size(); j++)
             {
-                bool mine = !(rand() % 10) ? true : false;
+                bool mine = !(std::rand() % 2) ? true : false;
                 if (mine)
                 {
                     _Grid[i][j].addMine(mine);
-                    _NumberOfMines++;
-                    if (_NumberOfMines >= mines)
+                    _number_of_mines++;
+                    if (_number_of_mines >= mines)
                         break;
                 }
             }
-            if (_NumberOfMines >= mines)
+            if (_number_of_mines >= mines)
                 break;
         }
     } 
-    while (_NumberOfMines < mines);
+    while (_number_of_mines < mines);
     for (size_t i = 0; i < _Grid.size(); i++)
         for (size_t j = 0; j < _Grid[i].size(); j++)
-            _Grid[i][j].getNeighbours(_Grid, i, j);
-    _NumberOfFlags = _NumberOfMines;
-    printGrid();
+            _Grid[i][j].get_neighbours(_Grid, i, j);
+    _number_of_flags = _number_of_mines;
+    draw();
 }
-void Game::discover(int x, int y)
+void Game::discover(size_t x, size_t y)
 {
-    int discovered = 0;
+    size_t discovered = 0;
     if (x >= 0 && x < _Grid.size() && y >= 0 && y < _Grid[x].size())
     {
         _Grid[x][y].discover(_Grid, x, y);
@@ -65,12 +62,12 @@ void Game::discover(int x, int y)
         {
             for (size_t j = 0; j < _Grid[x].size(); j++)
             {
-                if (_Grid[i][j].isDiscovered())
+                if (_Grid[i][j].is_discovered())
                 {
                     discovered++;
-                    if (_Grid[i][j].isFlagged())
+                    if (_Grid[i][j].is_flagged())
                     {
-                        _NumberOfFlags++;
+                        _number_of_flags++;
                         _Grid[i][j].flag();
                     }
                 }
@@ -78,7 +75,7 @@ void Game::discover(int x, int y)
         }
     }
 }
-void Game::printGrid()
+void Game::draw()
 {
     move(0, 0);
     for (size_t i = 0; i < _Grid.size(); i++)
@@ -87,56 +84,56 @@ void Game::printGrid()
         for (size_t j = 0; j < _Grid[i].size(); j++)
         {
             char c = '#';
-            if (_Grid[i][j].isDiscovered())
+            if (_Grid[i][j].is_discovered())
             {
-                c = _Grid[i][j].getNeighbours();
+                c = _Grid[i][j].get_neighbours();
                 c = c > 0 ? c + '0' : ' ';
             }
-            else if (_Grid[i][j].isFlagged())
+            else if (_Grid[i][j].is_flagged())
                 c = 'F';
-            else if ((_hasLost || _hasWon) && _Grid[i][j].isAMine())
+            else if ((_has_lost || _has_won) && _Grid[i][j].is_a_mine())
                 c = '*';
             printw("%c|", c);
         }
         printw("\n");
     }
-//    printw("\n%d Mines\n\n", _NumberOfFlags);
-    if (!_hasLost && !_hasWon)
+    printw("\n%d Mines\n\n", _number_of_flags);
+    if (!_has_lost && !_has_won)
     {
         int x, y;
         getsyx(x, y);
         move(x, y);
     }
 }
-int Game::getX()
+int Game::get_width()
 {
     return 1;
 }
-int Game::getY()
+int Game::get_height()
 {
     return 1;
 }
-bool Game::hasLost()
+bool Game::has_lost()
 {
     return false;
 }
-bool Game::hasWon()
+bool Game::has_won()
 {
     return false;
 }
-void Game::addFlag(int x, int y)
+void Game::add_flag(size_t x, size_t y)
 {
-    if (!_Grid[x][y].isDiscovered())
+    if (!_Grid[x][y].is_discovered())
     {
-        if (_Grid[x][y].isFlagged())
+        if (_Grid[x][y].is_flagged())
         {
             _Grid[x][y].flag();
-            _NumberOfFlags++;
+            _number_of_flags++;
         }
-        else if (_NumberOfFlags > 0)
+        else if (_number_of_flags > 0)
         {
             _Grid[x][y].flag();
-            _NumberOfFlags--;
+            _number_of_flags--;
         }
     }
 }

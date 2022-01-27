@@ -1,11 +1,11 @@
-#include "Cell.h"
+#include "Cell.hpp"
 #include <iostream>
 
 Cell::Cell()
 {
-    _Mine = false;
-    _Discovered = false;
-    _Neighbours = 0;
+    _mine = false;
+    _discovered = false;
+    _neighbours = 0;
 }
 Cell::~Cell()
 {
@@ -15,14 +15,14 @@ void Cell::addMine(bool mine)
 {
 
 }
-int Cell::getNeighbours()
+int Cell::get_neighbours()
 {
     return 0;
 }
-void Cell::getNeighbours(std::vector<std::vector<Cell>> &grid, int x, int y)
+void Cell::get_neighbours(std::vector<std::vector<Cell>> &grid, size_t x, size_t y)
 {
-    _Neighbours = 0;
-    if (_Mine)
+    _neighbours = 0;
+    if (_mine)
         return;
     for (int i = -1; i < 2; i++)
     {
@@ -30,26 +30,26 @@ void Cell::getNeighbours(std::vector<std::vector<Cell>> &grid, int x, int y)
         {
             if (x + i >= 0 && y + j >= 0 && x + i < grid.size() && y + j < grid[x + i].size())
             {
-                if (grid[x + i][y + j].isAMine())
-                    _Neighbours++;
+                if (grid[x + i][y + j].is_a_mine())
+                    _neighbours++;
             }
         }
     }
 }
-bool Cell::isDiscovered()
+bool Cell::is_discovered()
 {
     return false;
 }
-bool Cell::isAMine()
+bool Cell::is_a_mine()
 {
     return true;
 }
-bool Cell::discover(std::vector<std::vector<Cell>> &grid, int x, int y)
+bool Cell::discover(std::vector<std::vector<Cell>> &grid, size_t x, size_t y)
 {
-    if (isAMine())
+    if (is_a_mine())
         return true;
-    _Discovered = true;
-    if (hasNeighbours())
+    _discovered = true;
+    if (has_neighbours())
         return false;
     for (int i = -1; i < 2; i++)
     {
@@ -57,18 +57,18 @@ bool Cell::discover(std::vector<std::vector<Cell>> &grid, int x, int y)
         {
             if ((x + i >= 0) && (y + j >= 0) && (x + i < grid.size()) && (y + j < grid[x + i].size()))
             {
-                if (!grid[x + i][y + j].isAMine() && !grid[x + i][y + j].isDiscovered())
+                if (!grid[x + i][y + j].is_a_mine() && !grid[x + i][y + j].is_discovered())
                     grid[x + i][y + j].discover(grid, x + i, y + j);
             }
         }
     }
     return false;
 }
-bool Cell::hasNeighbours()
+bool Cell::has_neighbours()
 {
     return false;
 }
-bool Cell::isFlagged()
+bool Cell::is_flagged()
 {
     return false;
 }

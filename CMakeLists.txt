@@ -6,6 +6,10 @@ project(minesweeper)
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIR})
 
+add_definitions("-Wall")
+
+include_directories(inc)
+
 set(sources
     src/main.cpp 
     src/Game.cpp 
